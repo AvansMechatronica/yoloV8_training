@@ -10,6 +10,14 @@ Gebruik:
     python train_yolov8_tensorboard_fixed.py
 """
 
+# ==========================================================
+# 🧩 Imports
+# ----------------------------------------------------------
+# os, glob, subprocess en time zijn standaard Python-modules.
+# torch wordt gebruikt om te detecteren of een GPU beschikbaar is.
+# ultralytics bevat de YOLOv8-functionaliteit en instellingen.
+# ==========================================================
+
 import os
 import glob
 import subprocess
@@ -18,20 +26,41 @@ import torch
 from ultralytics import YOLO, settings
 
 
-# ========= CONFIG =========
-DATA_YAML = "SimpleFruits-1/data.yaml"      # Pad naar je data.yaml
-MODEL_NAME = "yolov8n.pt"                   # Basismodel
-EPOCHS = 30                                 # Aantal epochs
-IMG_SIZE = 640                              # Beeldresolutie
-BATCH_SIZE = 16                             # Batchgrootte
-RUN_NAME = "yolo8_tensorboard_fixed"        # Naam voor training
-PROJECT_DIR = "runs/detect"                 # Locatie waar resultaten worden opgeslagen
-START_TENSORBOARD = True                    # Automatisch TensorBoard starten
-# ===========================
+# ==========================================================
+# ⚙️ CONFIGURATIE-INSTELLINGEN
+# ----------------------------------------------------------
+# Hier stel je de dataset, modelparameters en trainingsopties in.
+# Pas deze waarden aan je project aan.
+# ==========================================================
 
+DATA_YAML = "SimpleFruits-1/data.yaml"      # Pad naar je data.yaml-bestand
+MODEL_NAME = "yolov8n.pt"                   # Basismodel (YOLOv8 Nano)
+EPOCHS = 30                                 # Aantal trainingsrondes (epochs)
+IMG_SIZE = 640                              # Beeldresolutie (px)
+BATCH_SIZE = 16                             # Hoeveel afbeeldingen tegelijk
+RUN_NAME = "yolo8_tensorboard_fixed"        # Naam van de trainingsrun
+PROJECT_DIR = "runs/detect"                 # Locatie voor resultaten
+START_TENSORBOARD = True                    # Automatisch TensorBoard starten
+
+
+# ==========================================================
+# 🧰 Functies
+# ----------------------------------------------------------
+# Hieronder staan hulpfuncties voor datasetcontrole, TensorBoard
+# opstarten en het trainen van het YOLO-model.
+# ==========================================================
 
 def check_dataset_structure():
-    """Controleer of dataset correct is opgezet."""
+    """
+    Controleer of de dataset correct is opgezet.
+    Verwacht structuur:
+        dataset/
+        ├── train/images/
+        ├── train/labels/
+        ├── valid/images/
+        ├── valid/labels/
+        └── data.yaml
+    """
     if not os.path.exists(DATA_YAML):
         raise FileNotFoundError(f"❌ YAML-bestand niet gevonden: {DATA_YAML}")
 
@@ -44,7 +73,10 @@ def check_dataset_structure():
 
 
 def start_tensorboard(logdir="runs"):
-    """Start TensorBoard (in achtergrond)."""
+    """
+    Start TensorBoard in de achtergrond.
+    Hiermee kun je de trainingsgrafieken live bekijken op http://localhost:6006
+    """
     print("📊 TensorBoard starten...")
     subprocess.Popen(["tensorboard", "--logdir", logdir, "--port", "6006"])
     time.sleep(3)
@@ -52,7 +84,10 @@ def start_tensorboard(logdir="runs"):
 
 
 def check_tfevents(logdir="runs"):
-    """Controleer of TensorBoard logs bestaan."""
+    """
+    Controleer of er TensorBoard-logbestanden (events.out.tfevents) zijn aangemaakt.
+    Zo weet je zeker dat de training correct gelogd is.
+    """
     log_files = glob.glob(os.path.join(logdir, "**", "events.out.tfevents*"), recursive=True)
     if not log_files:
         print("⚠️  Geen TensorBoard logs gevonden. Controleer of training correct liep.")
@@ -61,45 +96,58 @@ def check_tfevents(logdir="runs"):
 
 
 def train_yolov8():
-    """Train YOLOv8 met TensorBoard logging."""
+    """
+    Hoofdfunctie: voert de volledige YOLOv8-training uit.
+    Inclusief datasetcontrole, modelinrichting, TensorBoard-integratie en validatie.
+    """
+    # 🔍 Kies automatisch GPU (cuda) of CPU
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"💻 Apparaat: {device}")
 
-    # Dataset check
+    # 📂 Controleer datasetstructuur
     check_dataset_structure()
 
-    # TensorBoard logging forceren
+    # 📈 Zorg dat YOLO logs naar TensorBoard schrijft
     settings.update({'tensorboard': True})
 
-    # Model laden
+    # 🧠 Model laden
     print(f"📦 Model laden: {MODEL_NAME}")
     model = YOLO(MODEL_NAME)
 
-    # TensorBoard starten
+    # ▶️ TensorBoard starten (optioneel)
     if START_TENSORBOARD:
         start_tensorboard("runs")
 
+    # 🚀 Start de training
     print("🚀 Training starten...\n")
     results = model.train(
-        data=DATA_YAML,
-        epochs=EPOCHS,
-        imgsz=IMG_SIZE,
-        batch=BATCH_SIZE,
-        name=RUN_NAME,
-        project=PROJECT_DIR,
-        device=device,
-        verbose=True,
+        data=DATA_YAML,          # YAML-bestand met klassen en paden
+        epochs=EPOCHS,           # Aantal trainingsrondes
+        imgsz=IMG_SIZE,          # Afbeeldingsgrootte
+        batch=BATCH_SIZE,        # Batchgrootte
+        name=RUN_NAME,           # Naam van de run
+        project=PROJECT_DIR,     # Opslaglocatie
+        device=device,           # GPU of CPU
+        verbose=True,            # Toon details in terminal
     )
 
+    # ✅ Samenvatting na training
     print("\n✅ Training voltooid!")
     run_dir = os.path.join(PROJECT_DIR, RUN_NAME)
     print(f"📁 Resultaten opgeslagen in: {run_dir}")
 
-    # TensorBoard logs controleren
+    # 📊 TensorBoard-logbestanden controleren
     check_tfevents(run_dir)
 
     print("📈 Bekijk live resultaten op: http://localhost:6006\n")
 
+
+# ==========================================================
+# 🚦 Hoofduitvoer
+# ----------------------------------------------------------
+# Dit zorgt dat de training start wanneer het script direct
+# wordt uitgevoerd vanaf de terminal of IDE.
+# ==========================================================
 
 if __name__ == "__main__":
     train_yolov8()

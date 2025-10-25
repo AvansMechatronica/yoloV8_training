@@ -2,4 +2,5 @@ roboflow
 ultralytics
 torch
 tensorboard
+opencv-python
 

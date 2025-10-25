@@ -1,2 +1,4 @@
 from ultralytics import YOLO
-YOLO('yolov8n.pt')  # laadt een klein voorgetraind model
+
+# 🔹 Laadt een klein, voorgetraind YOLOv8-model (Nano-versie)
+model = YOLO('yolov8n.pt')
