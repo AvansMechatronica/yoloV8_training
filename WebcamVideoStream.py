@@ -12,8 +12,8 @@ import time                    # Tijdmodule om FPS (frames per seconde) te berek
 # 🔹 MODELKEUZE
 # Zet de waarde van 'if 0' naar 'if 1' als je je eigen getrainde model wilt gebruiken.
 # YOLOv8n.pt is een klein, voorgedefinieerd model dat standaardobjecten herkent (zoals mensen, auto's, etc.)
-if 0:
-    MODEL_PATH = "runs/detect/yolo8_tensorboard_run/weights/best.pt"  # <-- Jouw eigen model
+if 1:
+    MODEL_PATH = "runs/detect/yolo8_tensorboard_fixed/weights/best.pt"  # <-- Jouw eigen model
 else:
     MODEL_PATH = "yolov8n.pt"  # <-- Standaard YOLOv8 Nano model
 

@@ -1,4 +1,4 @@
 SimpleFruits-1
 .venv
 runs
-yolov8n.pt
+*.pt
