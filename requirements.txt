@@ -1,6 +1,9 @@
+--index-url https://download.pytorch.org/whl/cu121
 roboflow
 ultralytics
 torch
+torchvision
 tensorboard
 opencv-python
+easygui
 
